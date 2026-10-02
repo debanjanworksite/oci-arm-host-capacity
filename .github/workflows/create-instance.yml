@@ -67,6 +67,14 @@ jobs:
           printf '%s' "$OCI_PRIVATE_KEY" > ./private_key.pem
           chmod 600 ./private_key.pem
 
+      - name: Create private key file
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          printf '%s' "$OCI_PRIVATE_KEY" > ./private_key_pkcs8.pem
+          openssl pkcs8 -in ./private_key_pkcs8.pem -nocrypt -out ./private_key.pem
+          chmod 600 ./private_key.pem
+          head -1 ./private_key.pem
           
       - name: Run script
         env:
