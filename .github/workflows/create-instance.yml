@@ -40,4 +40,5 @@ jobs:
             --image-id "$OCI_IMAGE_ID" \
             --ssh-authorized-keys-file <(echo "$OCI_SSH_PUBLIC_KEY") \
             --display-name "gyanaloy-server" \
-            --assign-public-ip true 2>&1 || echo "Out of capacity, will retry"
+            --create-vnic-details '{"assignPublicIp":true,"subnetId":"'"$OCI_SUBNET_ID"'"}' \
+            2>&1 || echo "Out of capacity, will retry"
