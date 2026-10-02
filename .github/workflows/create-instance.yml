@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev
         
-      -      - name: Create .env file
+      - name: Create .env file
         env:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
