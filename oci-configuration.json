@@ -1,0 +1,25 @@
+{
+    "instances": [
+        {
+            "availabilityDomain": "AP-HYDERABAD-1-AD-1",
+            "compartmentId": "ocid1.tenancy.oc1..aaaaaaaazkble3m5fer3eifqgi3abcu27wt74mqsjjjru5c2skqamlo6roeq",
+            "displayName": "gyanaloy-server",
+            "shape": "VM.Standard.A1.Flex",
+            "shapeConfig": {
+                "ocpus": 4,
+                "memoryInGBs": 24
+            },
+            "sourceDetails": {
+                "imageId": "ocid1.image.oc1.ap-hyderabad-1.aaaaaaaa3mza2sx62iglmjxihlck45nhb3hwxnyzqckcagjlbfzeibae4kra",
+                "sourceType": "image"
+            },
+            "createVnicDetails": {
+                "subnetId": "ocid1.subnet.oc1.ap-hyderabad-1.aaaaaaaalgpruvocgjciyalrq4npdwed7yvvo3f6ox5levkltxqp52fsuxla",
+                "assignPublicIp": true
+            },
+            "metadata": {
+                "ssh_authorized_keys": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+KdHIkWGV8FyxNtZs9mkk9cPyScEBwClmztYPBPAi1rpkHDXs6Qg9qVfx3nrjIYARvG7gTyzj+PSTVY6+UJ4jx36qEaZ4WKaMP4U4eGDwxBcxsFNpPJQr8sHxk6b7yreyyzb5ztg+LFvqvaaRvTDy8JksT59p19CifakdlaOi4UWLF3oMn4jEt4xd7VNxAOLzBiRlXwuAWm5LEzH3Z8iWwmZbnkAMNCH5m83mthj2MePCVhYQqB+FpxuRWbNXovh2+nX2oYttWpgFcw+7Ruf8RJxpmy3jUeDaFR5Nhs91m8t/v1cGyHb3Epp1GsEfSSzWY5vmTPNZIxwNYWP4kFBv"
+            }
+        }
+    ]
+}
