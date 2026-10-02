@@ -26,27 +26,9 @@ jobs:
           mkdir -p ~/.oci
           printf '%s' "$OCI_PRIVATE_KEY" > ~/.oci/private_key.pem
           chmod 600 ~/.oci/private_key.pem
-          printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=%s\n' \
-            "$OCI_USER_ID" "$OCI_KEY_FINGERPRINT" "$OCI_TENANCY_ID" "$OCI_REGION" \
-            "/home/runner/.oci/private_key.pem" > ~/.oci/config
+          printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=%s\n' "$OCI_USER_ID" "$OCI_KEY_FINGERPRINT" "$OCI_TENANCY_ID" "$OCI_REGION" "/home/runner/.oci/private_key.pem" > ~/.oci/config
           chmod 600 ~/.oci/config
-          python3 -c "
-import json, os
-data = {
-  'availabilityDomain': 'AP-HYDERABAD-1-AD-1',
-  'compartmentId': os.environ['OCI_TENANCY_ID'],
-  'shape': 'VM.Standard.A1.Flex',
-  'shapeConfig': {'ocpus': 4, 'memoryInGBs': 24},
-  'sourceDetails': {'sourceType': 'image', 'imageId': os.environ['OCI_IMAGE_ID']},
-  'createVnicDetails': {'subnetId': os.environ['OCI_SUBNET_ID'], 'assignPublicIp': True},
-  'metadata': {'ssh_authorized_keys': os.environ['OCI_SSH_PUBLIC_KEY']},
-  'displayName': 'gyanaloy-server'
-}
-print(json.dumps(data, indent=2))
-with open('/tmp/instance.json', 'w') as f:
-    json.dump(data, f)
-"
-          oci compute instance launch \
-            --from-json file:///tmp/instance.json \
-            --subnet-id "$OCI_SUBNET_ID" \
-            2>&1 || echo "Out of capacity, will retry"
+          JSON="{\"availabilityDomain\":\"AP-HYDERABAD-1-AD-1\",\"compartmentId\":\"$OCI_TENANCY_ID\",\"shape\":\"VM.Standard.A1.Flex\",\"shapeConfig\":{\"ocpus\":4,\"memoryInGBs\":24},\"sourceDetails\":{\"sourceType\":\"image\",\"imageId\":\"$OCI_IMAGE_ID\"},\"createVnicDetails\":{\"subnetId\":\"$OCI_SUBNET_ID\",\"assignPublicIp\":true},\"metadata\":{\"ssh_authorized_keys\":\"$OCI_SSH_PUBLIC_KEY\"},\"displayName\":\"gyanaloy-server\"}"
+          echo "$JSON" > /tmp/instance.json
+          cat /tmp/instance.json
+          oci compute instance launch --from-json file:///tmp/instance.json --subnet-id "$OCI_SUBNET_ID" 2>&1 || echo "Out of capacity, will retry"
