@@ -21,7 +21,7 @@ jobs:
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
           OCI_CLI_SUPPRESS_FILE_PERMISSIONS_WARNING: "True"
           SUPPRESS_LABEL_WARNING: "True"
-        run: |
+         run: |
           pip install oci-cli -q
           mkdir -p ~/.oci
           printf '%s' "$OCI_PRIVATE_KEY" > ~/.oci/private_key.pem
@@ -30,15 +30,20 @@ jobs:
             "$OCI_USER_ID" "$OCI_KEY_FINGERPRINT" "$OCI_TENANCY_ID" "$OCI_REGION" \
             "/home/runner/.oci/private_key.pem" > ~/.oci/config
           chmod 600 ~/.oci/config
-          echo "$OCI_SSH_PUBLIC_KEY" > /tmp/ssh_key.pub
+          
+          cat > /tmp/instance.json << ENDJSON
+          {
+            "availabilityDomain": "AP-HYDERABAD-1-AD-1",
+            "compartmentId": "$OCI_TENANCY_ID",
+            "shape": "VM.Standard.A1.Flex",
+            "shapeConfig": {"ocpus": 4, "memoryInGBs": 24},
+            "sourceDetails": {"sourceType": "image", "imageId": "$OCI_IMAGE_ID"},
+            "createVnicDetails": {"subnetId": "$OCI_SUBNET_ID", "assignPublicIp": true},
+            "metadata": {"ssh_authorized_keys": "$OCI_SSH_PUBLIC_KEY"},
+            "displayName": "gyanaloy-server"
+          }
+          ENDJSON
+          
           oci compute instance launch \
-            --availability-domain "AP-HYDERABAD-1-AD-1" \
-            --compartment-id "$OCI_TENANCY_ID" \
-            --shape "VM.Standard.A1.Flex" \
-            --shape-config '{"ocpus":4,"memoryInGBs":24}' \
-            --subnet-id "$OCI_SUBNET_ID" \
-            --image-id "$OCI_IMAGE_ID" \
-            --ssh-authorized-keys-file /tmp/ssh_key.pub \
-            --display-name "gyanaloy-server" \
-            --assign-public-ip true \
+            --from-json file:///tmp/instance.json \
             2>&1 || echo "Out of capacity, will retry"
