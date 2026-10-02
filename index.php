@@ -77,6 +77,7 @@ echo "User: " . getenv('OCI_USER_ID') . "\n";
 echo "Key file exists: " . (file_exists(getenv('OCI_PRIVATE_KEY_FILENAME')) ? 'yes' : 'no') . "\n";
 echo "Key file size: " . filesize(getenv('OCI_PRIVATE_KEY_FILENAME')) . "\n";
 var_dump($config);
+echo "Starting script...\n";
 $instances = $api->getInstances($config);
 
 $existingInstances = $api->checkExistingInstances($config, $instances, $shape, $maxRunningInstancesOfThatShape);
@@ -84,6 +85,9 @@ if ($existingInstances) {
     echo "$existingInstances\n";
     return;
 }
+
+echo "Existing instances check done\n";
+echo "Result: " . $existingInstances . "\n";
 
 if (!empty($config->availabilityDomains)) {
     if (is_array($config->availabilityDomains)) {
