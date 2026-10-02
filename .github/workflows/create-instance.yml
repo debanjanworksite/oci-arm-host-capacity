@@ -26,14 +26,16 @@ jobs:
           chmod 600 ~/.oci/private_key.pem
           printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=%s\nkey_file=%s\n' "$OCI_USER_ID" "$OCI_KEY_FINGERPRINT" "$OCI_TENANCY_ID" "$OCI_REGION" "/home/runner/.oci/private_key.pem" > ~/.oci/config
           chmod 600 ~/.oci/config
+          echo "$OCI_SSH_PUBLIC_KEY" > /tmp/ssh_key.pub
           oci compute instance launch \
             --availability-domain "AP-HYDERABAD-1-AD-1" \
             --compartment-id "$OCI_TENANCY_ID" \
             --shape "VM.Standard.A1.Flex" \
-            --shape-config '{"ocpus": 4, "memoryInGBs": 24}' \
+            --shape-config '{"ocpus":4,"memoryInGBs":24}' \
             --image-id "$OCI_IMAGE_ID" \
             --subnet-id "$OCI_SUBNET_ID" \
             --assign-public-ip true \
+            --assign-private-dns-record true \
             --display-name "gyanaloy-server" \
-            --metadata "{\"ssh_authorized_keys\": \"$OCI_SSH_PUBLIC_KEY\"}" \
+            --ssh-authorized-keys-file /tmp/ssh_key.pub \
             2>&1 || echo "Out of capacity, will retry"
