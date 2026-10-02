@@ -38,4 +38,4 @@ jobs:
             --assign-private-dns-record true \
             --display-name "gyanaloy-server" \
             --ssh-authorized-keys-file /tmp/ssh_key.pub \
-            2>&1 || echo "Out of capacity, will retry"
+            --debug 2>&1 | grep -A5 "Request body\|Sending\|body\|CannotParse" | head -50 || echo "Out of capacity, will retry"
