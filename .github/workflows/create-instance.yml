@@ -20,6 +20,9 @@ jobs:
       - name: Find Signer
         run: find vendor -name "Signer.php"
 
+      - name: Check Signer line 99
+        run: sed -n '95,105p' vendor/hitrov/oci-api-php-request-sign/src/Hitrov/OCI/Signer.php
+
       - name: Create private key file
         env:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
