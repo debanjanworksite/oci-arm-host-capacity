@@ -1,4 +1,4 @@
-import oci, os
+import oci, os, json
 
 config = {
     'user': os.environ['OCI_USER_ID'],
@@ -20,6 +20,9 @@ details = oci.core.models.LaunchInstanceDetails(
     display_name='gyanaloy-server'
 )
 
+# Print request body for debugging
+print("Request body:", json.dumps(client._serializer.serialize_request(details), indent=2) if hasattr(client, '_serializer') else "N/A")
+
 try:
     response = client.launch_instance(details)
     print('Success:', response.data.id)
@@ -28,3 +31,6 @@ except oci.exceptions.ServiceError as e:
         print('Out of capacity, will retry')
     else:
         print('Error:', e)
+        # Print what was sent
+        import logging
+        logging.basicConfig(level=logging.DEBUG)
