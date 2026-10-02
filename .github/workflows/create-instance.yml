@@ -43,7 +43,15 @@ jobs:
             "metadata": {"ssh_authorized_keys": "$OCI_SSH_PUBLIC_KEY"},
             "displayName": "gyanaloy-server"
           }
-          ENDJSON
+            ENDJSON
+          
+          cat /tmp/instance.json
+          
+          oci compute instance launch \
+            --from-json file:///tmp/instance.json \
+            --subnet-id "$OCI_SUBNET_ID" \
+            2>&1 || echo "Out of capacity, will retry"
+            
           
           oci compute instance launch \
             --from-json file:///tmp/instance.json \
