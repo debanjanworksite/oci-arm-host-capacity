@@ -12,16 +12,12 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Setup PHP
-        uses: shivammathur/setup-php@2.32.0
-        with:
-          php-version: '8.2'
-          
+        run: sudo apt-get install -y php-cli php-curl php-json
+
       - name: Install dependencies
         run: composer install --no-dev
-        
+
       - name: Create .env file
-        env:
-          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
           echo "OCI_REGION=${{ secrets.OCI_REGION }}" >> .env
           echo "OCI_USER_ID=${{ secrets.OCI_USER_ID }}" >> .env
