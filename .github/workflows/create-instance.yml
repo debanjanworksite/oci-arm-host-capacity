@@ -27,9 +27,13 @@ jobs:
         env:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          printf '%s' "$OCI_PRIVATE_KEY" > ./private_key.pem
+          echo "$OCI_PRIVATE_KEY" > ./private_key.pem
           chmod 600 ./private_key.pem
-
+          echo "Lines in key:"
+          wc -l ./private_key.pem
+          head -2 ./private_key.pem
+          tail -2 ./private_key.pem
+          
       - name: Create .env file
         run: |
           echo "OCI_REGION=${{ secrets.OCI_REGION }}" >> .env
