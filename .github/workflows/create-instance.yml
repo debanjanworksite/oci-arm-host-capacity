@@ -45,5 +45,14 @@ jobs:
           cat ./private_key.pem | head -5
           cat .env
           
+      - name: Debug private key
+        run: |
+          echo "Key file size:"
+          wc -c ./private_key.pem
+          echo "First line:"
+          head -1 ./private_key.pem
+          echo "Last line:"
+          tail -1 ./private_key.pem
+          
       - name: Run script
         run: php index.php
