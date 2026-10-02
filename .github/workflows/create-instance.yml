@@ -31,7 +31,7 @@ jobs:
             "/home/runner/.oci/private_key.pem" > ~/.oci/config
           chmod 600 ~/.oci/config
           
-          oci compute instance launch \
+           oci compute instance launch \
             --availability-domain "AP-HYDERABAD-1-AD-1" \
             --compartment-id "$OCI_TENANCY_ID" \
             --shape "VM.Standard.A1.Flex" \
@@ -41,4 +41,4 @@ jobs:
             --ssh-authorized-keys-file <(echo "$OCI_SSH_PUBLIC_KEY") \
             --display-name "gyanaloy-server" \
             --assign-public-ip true \
-            2>&1 || echo "Out of capacity, will retry"
+            --debug 2>&1 | tail -50 || echo "Out of capacity, will retry"
