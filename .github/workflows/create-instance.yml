@@ -53,6 +53,12 @@ jobs:
           head -1 ./private_key.pem
           echo "Last line:"
           tail -1 ./private_key.pem
-          
+
+      - name: Test OCI API
+        run: |
+          curl -s --request GET \
+            "https://iaas.ap-hyderabad-1.oraclecloud.com/20160918/instances?compartmentId=${{ secrets.OCI_TENANCY_ID }}" \
+            -H "Authorization: Bearer test" | head -100
+
       - name: Run script
         run: php index.php
