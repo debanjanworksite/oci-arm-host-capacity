@@ -17,10 +17,8 @@ jobs:
       - name: Install dependencies
         run: composer install --no-dev
 
-      - name: Patch Signer.php
-        run: |
-          SIGNER_FILE="vendor/hitrov/oci-api-php-request-sign/src/Hitrov/OCI/Signer.php"
-          sed -i 's/openssl_sign(\$signingString, \$signature, \$privateKey,/openssl_sign($signingString, $signature, openssl_pkey_get_private($privateKey),/' $SIGNER_FILE
+      - name: Find Signer
+        run: find vendor -name "Signer.php"
 
       - name: Create private key file
         env:
@@ -46,9 +44,4 @@ jobs:
       - name: Run script
         env:
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-        run: |
-          echo "PHP version:"
-          php --version
-          echo "File exists:"
-          ls -la index.php
-          php index.php
+        run: php index.php
