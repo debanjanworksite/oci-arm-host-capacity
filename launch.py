@@ -10,7 +10,6 @@ config = {
 
 client = oci.core.ComputeClient(config)
 
-# Get latest Ubuntu 22.04 ARM image automatically
 images = client.list_images(
     compartment_id=os.environ['OCI_TENANCY_ID'],
     operating_system='Canonical Ubuntu',
@@ -21,8 +20,9 @@ images = client.list_images(
 )
 
 image_id = images.data[0].id
-print(f"Using image: {images.data[0].display_name}")
-print(f"Image ID: {image_id}")
+ssh_key = os.environ['OCI_SSH_PUBLIC_KEY'].strip()
+print(f"SSH key length: {len(ssh_key)}")
+print(f"SSH key starts with: {ssh_key[:20]}")
 
 details = oci.core.models.LaunchInstanceDetails(
     availability_domain='AP-HYDERABAD-1-AD-1',
@@ -34,7 +34,7 @@ details = oci.core.models.LaunchInstanceDetails(
         subnet_id=os.environ['OCI_SUBNET_ID'],
         assign_public_ip=True
     ),
-    metadata={'ssh_authorized_keys': os.environ['OCI_SSH_PUBLIC_KEY']},
+    metadata={'ssh_authorized_keys': ssh_key},
     display_name='gyanaloy-server'
 )
 
