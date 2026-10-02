@@ -47,4 +47,5 @@ jobs:
           
           oci compute instance launch \
             --from-json file:///tmp/instance.json \
+            --subnet-id "$OCI_SUBNET_ID" \
             2>&1 || echo "Out of capacity, will retry"
