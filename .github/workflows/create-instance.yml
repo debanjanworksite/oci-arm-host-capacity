@@ -10,12 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup PHP
         run: sudo apt-get install -y php-cli php-curl php-json
 
       - name: Install dependencies
         run: composer install --no-dev
+
+      - name: Create private key file
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          printf '%s' "$OCI_PRIVATE_KEY" > ./private_key.pem
+          chmod 600 ./private_key.pem
 
       - name: Create .env file
         run: |
@@ -30,55 +37,7 @@ jobs:
           echo "OCI_MEMORY_IN_GBS=24" >> .env
           echo "OCI_SHAPE=VM.Standard.A1.Flex" >> .env
           echo "OCI_AVAILABILITY_DOMAIN=AP-HYDERABAD-1-AD-1" >> .env
-          echo "OCI_SSH_PUBLIC_KEY=\"${{ secrets.OCI_SSH_PUBLIC_KEY }}\"" >> .env
+          echo 'OCI_SSH_PUBLIC_KEY=${{ secrets.OCI_SSH_PUBLIC_KEY }}' >> .env
 
-      - name: Create private key file
-        run: |
-          echo "${{ secrets.OCI_PRIVATE_KEY }}" > ./private_key.pem
-          chmod 600 ./private_key.pem
-
-      - name: Debug env
-        run: |
-          echo "Region: ${{ secrets.OCI_REGION }}"
-          echo "User: ${{ secrets.OCI_USER_ID }}"
-          echo "Fingerprint: ${{ secrets.OCI_KEY_FINGERPRINT }}"
-          cat ./private_key.pem | head -5
-          cat .env
-          
-      - name: Debug private key
-        run: |
-          echo "Key file size:"
-          wc -c ./private_key.pem
-          echo "First line:"
-          head -1 ./private_key.pem
-          echo "Last line:"
-          tail -1 ./private_key.pem
-
-      - name: Test OCI API
-        run: |
-          curl -s --request GET \
-            "https://iaas.ap-hyderabad-1.oraclecloud.com/20160918/instances?compartmentId=${{ secrets.OCI_TENANCY_ID }}" \
-            -H "Authorization: Bearer test" | head -100
-
-      - name: Create private key file
-        env:
-          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
-        run: |
-          printf '%s' "$OCI_PRIVATE_KEY" > ./private_key.pem
-          chmod 600 ./private_key.pem
-          
       - name: Run script
-        env:
-          OCI_REGION: ${{ secrets.OCI_REGION }}
-          OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
-          OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
-          OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
-          OCI_PRIVATE_KEY_FILENAME: ./private_key.pem
-          OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
-          OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
-          OCI_OCPUS: 4
-          OCI_MEMORY_IN_GBS: 24
-          OCI_SHAPE: VM.Standard.A1.Flex
-          OCI_AVAILABILITY_DOMAIN: AP-HYDERABAD-1-AD-1
-          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
         run: php index.php
