@@ -41,4 +41,9 @@ jobs:
       - name: Run script
         env:
           OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-        run: php index.php
+        run: |
+          echo "PHP version:"
+          php --version
+          echo "File exists:"
+          ls -la index.php
+          php index.php
