@@ -1,4 +1,4 @@
-import oci, os, json
+import oci, os
 
 config = {
     'user': os.environ['OCI_USER_ID'],
@@ -9,19 +9,34 @@ config = {
 }
 
 client = oci.core.ComputeClient(config)
+
+# Get latest Ubuntu 22.04 ARM image automatically
+images = client.list_images(
+    compartment_id=os.environ['OCI_TENANCY_ID'],
+    operating_system='Canonical Ubuntu',
+    operating_system_version='22.04',
+    shape='VM.Standard.A1.Flex',
+    sort_by='TIMECREATED',
+    sort_order='DESC'
+)
+
+image_id = images.data[0].id
+print(f"Using image: {images.data[0].display_name}")
+print(f"Image ID: {image_id}")
+
 details = oci.core.models.LaunchInstanceDetails(
     availability_domain='AP-HYDERABAD-1-AD-1',
     compartment_id=os.environ['OCI_TENANCY_ID'],
     shape='VM.Standard.A1.Flex',
     shape_config=oci.core.models.LaunchInstanceShapeConfigDetails(ocpus=4, memory_in_gbs=24),
-    source_details=oci.core.models.InstanceSourceViaImageDetails(image_id=os.environ['OCI_IMAGE_ID']),
-    create_vnic_details=oci.core.models.CreateVnicDetails(subnet_id=os.environ['OCI_SUBNET_ID'], assign_public_ip=True),
+    source_details=oci.core.models.InstanceSourceViaImageDetails(image_id=image_id),
+    create_vnic_details=oci.core.models.CreateVnicDetails(
+        subnet_id=os.environ['OCI_SUBNET_ID'],
+        assign_public_ip=True
+    ),
     metadata={'ssh_authorized_keys': os.environ['OCI_SSH_PUBLIC_KEY']},
     display_name='gyanaloy-server'
 )
-
-# Print request body for debugging
-print("Request body:", json.dumps(client._serializer.serialize_request(details), indent=2) if hasattr(client, '_serializer') else "N/A")
 
 try:
     response = client.launch_instance(details)
@@ -31,6 +46,3 @@ except oci.exceptions.ServiceError as e:
         print('Out of capacity, will retry')
     else:
         print('Error:', e)
-        # Print what was sent
-        import logging
-        logging.basicConfig(level=logging.DEBUG)
