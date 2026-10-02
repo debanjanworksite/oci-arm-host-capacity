@@ -70,7 +70,7 @@ $maxRunningInstancesOfThatShape = 1;
 if (getenv('OCI_MAX_INSTANCES') !== false) {
     $maxRunningInstancesOfThatShape = (int) getenv('OCI_MAX_INSTANCES');
 }
-
+var_dump($config);
 $instances = $api->getInstances($config);
 
 $existingInstances = $api->checkExistingInstances($config, $instances, $shape, $maxRunningInstancesOfThatShape);
