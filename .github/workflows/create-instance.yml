@@ -9,46 +9,33 @@ jobs:
   create-instance:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Install oci-cli
+        run: pip install oci-cli
 
-      - name: Setup PHP
-        run: sudo apt-get install -y php-cli php-curl php-json
-
-      - name: Install dependencies
-        run: composer install --no-dev
-
-      - name: Find Signer
-        run: find vendor -name "Signer.php"
-        
-      - name: Check Signer lines 80-100
-        run: sed -n '80,99p' vendor/hitrov/oci-api-php-request-sign/src/Hitrov/OCI/Signer.php
-
-      - name: Create private key file
+      - name: Configure OCI
         env:
           OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
-          echo "$OCI_PRIVATE_KEY" > ./private_key.pem
-          chmod 600 ./private_key.pem
-          echo "Lines in key:"
-          wc -l ./private_key.pem
-          head -2 ./private_key.pem
-          tail -2 ./private_key.pem
-          
-      - name: Create .env file
-        run: |
-          echo "OCI_REGION=${{ secrets.OCI_REGION }}" >> .env
-          echo "OCI_USER_ID=${{ secrets.OCI_USER_ID }}" >> .env
-          echo "OCI_TENANCY_ID=${{ secrets.OCI_TENANCY_ID }}" >> .env
-          echo "OCI_KEY_FINGERPRINT=${{ secrets.OCI_KEY_FINGERPRINT }}" >> .env
-          echo "OCI_PRIVATE_KEY_FILENAME=./private_key.pem" >> .env
-          echo "OCI_SUBNET_ID=${{ secrets.OCI_SUBNET_ID }}" >> .env
-          echo "OCI_IMAGE_ID=${{ secrets.OCI_IMAGE_ID }}" >> .env
-          echo "OCI_OCPUS=4" >> .env
-          echo "OCI_MEMORY_IN_GBS=24" >> .env
-          echo "OCI_SHAPE=VM.Standard.A1.Flex" >> .env
-          echo "OCI_AVAILABILITY_DOMAIN=AP-HYDERABAD-1-AD-1" >> .env
+          mkdir -p ~/.oci
+          echo "$OCI_PRIVATE_KEY" > ~/.oci/private_key.pem
+          chmod 600 ~/.oci/private_key.pem
+          cat > ~/.oci/config << EOF
+          [DEFAULT]
+          user=${{ secrets.OCI_USER_ID }}
+          fingerprint=${{ secrets.OCI_KEY_FINGERPRINT }}
+          tenancy=${{ secrets.OCI_TENANCY_ID }}
+          region=${{ secrets.OCI_REGION }}
+          key_file=~/.oci/private_key.pem
+          EOF
 
-      - name: Run script
-        env:
-          OCI_SSH_PUBLIC_KEY: ${{ secrets.OCI_SSH_PUBLIC_KEY }}
-        run: php index.php
+      - name: Create Instance
+        run: |
+          oci compute instance launch \
+            --availability-domain "AP-HYDERABAD-1-AD-1" \
+            --compartment-id "${{ secrets.OCI_TENANCY_ID }}" \
+            --shape "VM.Standard.A1.Flex" \
+            --shape-config '{"ocpus":4,"memoryInGBs":24}' \
+            --subnet-id "${{ secrets.OCI_SUBNET_ID }}" \
+            --image-id "${{ secrets.OCI_IMAGE_ID }}" \
+            --ssh-authorized-keys-file <(echo "${{ secrets.OCI_SSH_PUBLIC_KEY }}") \
+            --display-name "gyanaloy-server" || echo "Out of capacity, will retry"
