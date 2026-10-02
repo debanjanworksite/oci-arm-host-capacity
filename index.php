@@ -70,6 +70,12 @@ $maxRunningInstancesOfThatShape = 1;
 if (getenv('OCI_MAX_INSTANCES') !== false) {
     $maxRunningInstancesOfThatShape = (int) getenv('OCI_MAX_INSTANCES');
 }
+
+
+echo "Region: " . getenv('OCI_REGION') . "\n";
+echo "User: " . getenv('OCI_USER_ID') . "\n";
+echo "Key file exists: " . (file_exists(getenv('OCI_PRIVATE_KEY_FILENAME')) ? 'yes' : 'no') . "\n";
+echo "Key file size: " . filesize(getenv('OCI_PRIVATE_KEY_FILENAME')) . "\n";
 var_dump($config);
 $instances = $api->getInstances($config);
 
